@@ -113,7 +113,6 @@ docker exec -it hermes hermes doctor
 
 * **Launch interactive CLI chat session:**
 ```bash
-```bash
 docker exec -it hermes hermes chat
 
 ```
