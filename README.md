@@ -19,13 +19,15 @@ The stack integrates LLM orchestration (OpenAI API, Google Gemini), a network Ga
 
 ---
 
-## 📦 Directory Structure & Setup
+## 📦 Directory Structure
 
-Before spinning up the container, ensure the following configuration architecture exists within the user's home directory:
+This repository is designed to run self-contained. All application configurations, identity profiles, and memories are mounted directly from the repository's root directory:
 
 ```text
-~/.hermes/
-├── .env                # Application environment variables
+.
+├── docker-compose.yaml # Docker multi-container specification
+├── .env.example        # Template for your local environment variables
+├── .env                # Your local secrets (Ignored by Git)
 ├── config.yaml         # Main agent configuration file
 ├── SOUL.md             # Bot identity and personality definition
 └── memories/
@@ -36,29 +38,17 @@ Before spinning up the container, ensure the following configuration architectur
 
 ---
 
-## 🔑 Environment Variables (`~/.hermes/.env`)
+## 🧠 Context & Identity Initialization (`~/.hermes/`)
 
-Create and populate the `.env` file inside the `~/.hermes/` directory before deploying the stack:
+The core personality and memory architecture of the agent depend on three markdown files. Inside the container, the application expects these files to reside in the user's home configuration directory (`~/.hermes/` and `~/.hermes/memories/`).
 
-```env
-# API Keys
-OPENAI_API_KEY=sk-proj-YourOpenAIApiKey...
-GOOGLE_API_KEY=AIzaSy...
+Through Docker volume mapping, the files located in your local repository directory are mounted directly to those target paths inside the running container.
 
-# Telegram Bot Integration
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
-TELEGRAM_ALLOWED_USERS=YourTelegramID  # Comma-separated if specifying multiple IDs
-
-# Dashboard Security
-HERMES_DASHBOARD_USER=admin
-HERMES_DASHBOARD_PASSWORD=ChooseASecureDashboardPassword
-HERMES_DASHBOARD_SECRET=GenerateARandomStringForSessionSigning
-
-```
+⚠️ **Crucial Timing:** You must populate and verify the content of `SOUL.md`, `memories/USER.md`, and `memories/MEMORY.md` **BEFORE running the deployment** (`docker compose up -d`). The agent reads its identity framework and infrastructure topography during its bootstrap phase; changes made after deployment will require a container restart to take effect.
 
 ---
 
-## ⚙️ Model Configuration Example (`~/.hermes/config.yaml`)
+## ⚙️ Model Configuration Example (`config.yaml`)
 
 To ensure accurate provider mapping and prevent *Unknown provider* runtime exceptions, the `model` section must target the explicit provider identifier:
 
@@ -73,30 +63,47 @@ model:
 
 ## 🚀 Deployment
 
-1. Clone this repository to your target workspace:
+1. **Clone this repository** to your target workspace on your Raspberry Pi:
+
 ```bash
-git clone <your-repository-url>
-cd <repository-folder-name>
+git clone git@github.com:kszymczycha/hermes-agent-stack.git
+cd hermes-agent-stack
 
 ```
 
+2. **Prepare the environment file** by copying the provided example template:
 
-2. Pull the latest image layers and deploy the stack in the background (detached mode):
+```bash
+cp .env.example .env
+
+```
+
+3. **Configure your secrets** inside the newly created `.env` file using `nano` or your preferred text editor:
+
+```bash
+nano .env
+
+```
+
+> 💡 *Note: Secure your session signing by generating a random hex string for `HERMES_DASHBOARD_SECRET` directly on your Pi via: `openssl rand -hex 32*`
+
+4. **Initialize identity and context documents:**
+Review and modify `SOUL.md`, `memories/USER.md`, and `memories/MEMORY.md` to feed the agent its personality, your preferences, and your local network/IoT environment details **before** starting the engine.
+5. **Deploy the stack** in the background (detached mode):
+
 ```bash
 docker compose pull
 docker compose up -d
 
 ```
 
+6. **Verify operational status** and view runtime gateway logs:
 
-3. Verify operational status and view runtime gateway logs:
 ```bash
 docker compose ps
 docker compose logs -f
 
 ```
-
-
 
 ---
 
@@ -105,26 +112,25 @@ docker compose logs -f
 All internal agent tasks can be issued directly within the context of the running container:
 
 * **Verify configuration and connectivity (Doctor):**
+
 ```bash
 docker exec -it hermes hermes doctor
 
 ```
 
-
 * **Launch interactive CLI chat session:**
+
 ```bash
 docker exec -it hermes hermes chat
 
 ```
 
-
 * **Force application core update:**
+
 ```bash
 docker exec -it hermes hermes update
 
 ```
-
-
 
 ---
 
@@ -137,7 +143,7 @@ http://<SERVER-IP>:9119
 
 ```
 
-*Authentication requires the credentials specified by the `HERMES_DASHBOARD_USER` and `HERMES_DASHBOARD_PASSWORD` environment variables.*
+*Authentication requires the credentials specified by the `HERMES_DASHBOARD_USER` and `HERMES_DASHBOARD_PASSWORD` variables, while sessions are securely managed by `HERMES_DASHBOARD_SECRET`.*
 
 ---
 
