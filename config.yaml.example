@@ -8,12 +8,12 @@
 # that your account actually has access to.
 
 model:
-  provider: openai-api      # openai-api | deepseek | openrouter | anthropic | ...
-  default: gpt-5-nano       # replace with a model available to your key
+  provider: openrouter
+  default: deepseek/deepseek-v4.1-flash-1017
 
-  # DeepSeek alternative:
-  # provider: deepseek
-  # default: deepseek/deepseek-v4.1-flash-1017
+  # OpenAI direct alternative:
+  # provider: openai-api
+  # default: gpt-5-nano
 
   # Custom / self-hosted endpoints only:
   # base_url: http://host.docker.internal:8000/v1
@@ -22,10 +22,10 @@ model:
 # faster/cheaper model instead of the main one.
 # auxiliary:
 #   compression:
-#     provider: deepseek
+#     provider: openrouter
 #     model: deepseek/deepseek-v4.1-flash-1017
 #   vision:
-#     provider: deepseek
+#     provider: openrouter
 #     model: deepseek/deepseek-v4.1-flash-1017
 
 # Optional: only needed when the dashboard is served through a reverse proxy.

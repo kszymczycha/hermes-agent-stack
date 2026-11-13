@@ -20,10 +20,26 @@ The stack runs the messaging gateway (Telegram, Discord, Slack, …), the web da
 ├── .env.example            # Deployment variables for Compose (copy to .env)
 ├── config.yaml.example     # Agent config          -> $HERMES_DATA_DIR/config.yaml
 ├── SOUL.md.example         # Agent identity        -> $HERMES_DATA_DIR/SOUL.md
+├── AGENTS.md               # OpenCode project instructions (agent guide)
+├── AGENT.md                # Symlink -> AGENTS.md (singular compatibility)
+├── opencode.json           # OpenCode V2 config; loads PLAN.md as instructions
+├── .agents/
+│   └── skills/
+│       └── hermes-agent-stack/
+│           └── SKILL.md    # Project skill for OpenCode and Hermes
+├── SKILL.md                # Symlink -> .agents/.../SKILL.md
+├── PLAN.md                 # Backlog and session handoff notes
+├── LICENSE                 # MIT
 └── memories/
     ├── USER.md.example     # User profile          -> $HERMES_DATA_DIR/memories/USER.md
     └── MEMORY.md.example   # Environment facts     -> $HERMES_DATA_DIR/memories/MEMORY.md
 ```
+
+> **OpenCode V2** loads `AGENTS.md` automatically, discovers the skill in
+> `.agents/skills/hermes-agent-stack/`, and loads `PLAN.md` through
+> `opencode.json`. **Hermes** discovers the same skill directory after a one-time
+> `hermes skills trust` inside the repository. `AGENT.md` and root `SKILL.md`
+> are compatibility symlinks — edit the canonical files, not the links.
 
 Runtime state is **not** stored in this repository. By default it lives in `~/.hermes`:
 
@@ -47,7 +63,7 @@ $HERMES_DATA_DIR/
 ## Prerequisites
 
 - Docker Engine and Docker Compose v2 (`docker compose version`).
-- An LLM API key supported by Hermes — for example `OPENAI_API_KEY` (provider `openai-api`) or `DEEPSEEK_API_KEY` (provider `deepseek`). Any provider listed in the [Hermes docs](https://hermes-agent.nousresearch.com/docs/integrations/providers) works.
+- An LLM API key supported by Hermes — this stack documents `OPENROUTER_API_KEY` (provider `openrouter`) with `deepseek/deepseek-v4.1-flash-1017`. Direct OpenAI (`openai-api`) or any other provider listed in the [Hermes docs](https://hermes-agent.nousresearch.com/docs/integrations/providers) also works.
 - Optional: a Telegram bot token from [@BotFather](https://t.me/BotFather).
 - On a Raspberry Pi: a 64-bit OS (arm64), at least 2 GB of free RAM and ~2 GB of disk for the image. 4 GB RAM is comfortable.
 
@@ -65,9 +81,12 @@ cd hermes-agent-stack
 ### 2. Create the Compose environment file
 
 ```bash
-cp .env.example .env
+[ -f .env ] || cp .env.example .env
 chmod 600 .env
 ```
+
+If `.env` already exists, edit it instead of overwriting it — it contains your
+dashboard credentials.
 
 Edit `.env` and set at least:
 
@@ -87,13 +106,14 @@ Edit `.env` and set at least:
 DATA_DIR="$HOME/.hermes"
 
 mkdir -p "$DATA_DIR/memories"
-cp config.yaml.example "$DATA_DIR/config.yaml"
-cp SOUL.md.example     "$DATA_DIR/SOUL.md"
-cp memories/USER.md.example   "$DATA_DIR/memories/USER.md"
-cp memories/MEMORY.md.example "$DATA_DIR/memories/MEMORY.md"
+cp -n config.yaml.example "$DATA_DIR/config.yaml"
+cp -n SOUL.md.example     "$DATA_DIR/SOUL.md"
+cp -n memories/USER.md.example   "$DATA_DIR/memories/USER.md"
+cp -n memories/MEMORY.md.example "$DATA_DIR/memories/MEMORY.md"
 ```
 
-Then edit the copies — the templates contain placeholders:
+`cp -n` skips files that already exist, so a live configuration is never
+overwritten. Review the copied files and fill in the placeholders.
 
 - `config.yaml` — set the provider and model.
 - `SOUL.md` — the agent's personality and operating principles.
@@ -107,15 +127,18 @@ Then edit the copies — the templates contain placeholders:
 Create the data-dir `.env` and fill in your keys:
 
 ```bash
-install -m 600 /dev/null "$DATA_DIR/.env"
+[ -e "$DATA_DIR/.env" ] || install -m 600 /dev/null "$DATA_DIR/.env"
 $EDITOR "$DATA_DIR/.env"
 ```
 
-Minimum contents for an OpenAI + Telegram setup:
+If the file already exists, do not truncate it — edit it instead. It contains
+the agent's API keys and bot tokens.
+
+Minimum contents for an OpenRouter + Telegram setup:
 
 ```dotenv
-OPENAI_API_KEY=sk-...
-# DEEPSEEK_API_KEY=...
+OPENROUTER_API_KEY=sk-or-...
+# OPENAI_API_KEY=...   # optional alternative, provider openai-api
 
 TELEGRAM_BOT_TOKEN=123456789:AA...
 # Comma-separated numeric Telegram user IDs allowed to talk to the bot.
@@ -181,16 +204,16 @@ Hermes resolves settings in this order (highest priority first):
 
 ```yaml
 model:
-  provider: openai-api      # openai-api | deepseek | openrouter | anthropic | ...
-  default: gpt-5-nano       # example only; use a model your key can access
+  provider: openrouter
+  default: deepseek/deepseek-v4.1-flash-1017
 ```
 
-For DeepSeek:
+For direct OpenAI instead:
 
 ```yaml
 model:
-  provider: deepseek
-  default: deepseek/deepseek-v4.1-flash-1017
+  provider: openai-api
+  default: gpt-5-nano       # example only; use a model your key can access
 ```
 
 Provider IDs and model catalogues change over time. The reliable way to pick a model is the dashboard's **Models** page or, inside the container:
@@ -204,8 +227,8 @@ docker exec -it hermes hermes model
 ### Dynamic model switches via Telegram
 
 ```text
+/model deepseek/deepseek-v4.1-flash-1017 --provider openrouter --global
 /model <model-id> --provider openai-api --global
-/model deepseek/deepseek-v4.1-flash-1017 --provider deepseek --global
 ```
 
 `--global` persists the choice to `config.yaml`; without it, the switch applies only to the current session.
