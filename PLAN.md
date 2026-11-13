@@ -8,6 +8,25 @@ first, then check `git log` and `git status` before changing anything.
 
 ---
 
+## Resume snapshot
+
+- **As of:** 2026-11-13. Run `git log -1` for the exact commit.
+- **Branch:** `main`, expected to be synced with `origin/main`.
+- **Next task:** `P2-1` — CI validation workflow.
+- **Blocked:** none.
+- **Canonical agent files:** `AGENTS.md` and
+  `.agents/skills/hermes-agent-stack/SKILL.md`. Do not recreate root-level
+  symlinks.
+- **First command in a new session:**
+
+  ```bash
+  git pull --ff-only
+  git status --short --branch
+  git log --oneline -3
+  ```
+
+---
+
 ## Current state
 
 - **Purpose:** self-hosted Hermes Agent stack (gateway + dashboard, optional
@@ -48,6 +67,8 @@ first, then check `git log` and `git status` before changing anything.
 ## Backlog
 
 Pick the first unchecked item in priority order unless the user says otherwise.
+**Next up: `P2-1` (CI validation workflow).**
+
 Keep the table statuses accurate: `todo`, `in progress`, `blocked`, `done`.
 
 | ID | Priority | Task | Status |
@@ -318,12 +339,16 @@ Run these from the repository root. Do not commit `.env`, `config.yaml`,
 - **Pinned image:** update `HERMES_IMAGE_TAG` deliberately; never use `latest`.
 - **One gateway per data directory:** never run two containers against the same
   `$HERMES_DATA_DIR`.
+- **Canonical agent files only:** `AGENTS.md` and
+  `.agents/skills/hermes-agent-stack/SKILL.md`. Do not recreate root-level
+  symlinks.
 - Commit messages: short English imperative subject, optional bullet body.
 - Update this plan in the same commit when a backlog item is completed.
 
 ## How to resume in a new session
 
-1. `git status --short --branch` and `git log --oneline -5`.
+1. `git pull --ff-only`, `git status --short --branch`, and
+   `git log --oneline -5`.
 2. Read `AGENTS.md` (working rules) and this file; pick the first `todo` item by
    priority.
 3. Mark it `in progress` mentally (or in the table if the session is long).
@@ -348,3 +373,6 @@ Run these from the repository root. Do not commit `.env`, `config.yaml`,
   compatibility links for legacy filenames.
 - **2026-11-13:** Cleaned up: removed the redundant compatibility symlinks and
   kept only the canonical `AGENTS.md` and the skill in `.agents/skills/`.
+- **2026-11-13:** Added a resume snapshot to the top of this file (branch
+  state, next task, first commands) so a new session can start without reading
+  the changelog.

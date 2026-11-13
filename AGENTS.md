@@ -78,6 +78,7 @@ Key constraints:
 Before changing anything:
 
 ```bash
+git pull --ff-only
 git status --short --branch
 git log --oneline -5
 sed -n '1,80p' PLAN.md
