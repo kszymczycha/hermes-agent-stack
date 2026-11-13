@@ -1,0 +1,34 @@
+# Environment & Long-Term Memory
+
+<!--
+Copy to: $HERMES_DATA_DIR/memories/MEMORY.md
+
+Infrastructure topology and durable facts the agent should know before it
+starts poking around. Do not put secrets here — those belong in .env.
+-->
+
+## Hosts
+
+- `pi` — Raspberry Pi 4 (4 GB RAM, arm64), Debian, Docker + Compose v2
+  - Runs this Hermes stack (`~/projects/hermes-agent-stack`)
+  - SSH: `ssh pi@192.168.1.10`
+- `nas` — Synology, 192.168.1.20, SMB shares under `/volume1`
+
+## Network
+
+- LAN: `192.168.1.0/24`, gateway `192.168.1.1`
+- DNS: Pi-hole at `192.168.1.5`
+- No services are exposed directly to the internet; remote access is via
+  WireGuard/Tailscale or an SSH tunnel.
+
+## Services
+
+- Hermes dashboard: `http://127.0.0.1:9119` on the host (loopback only)
+- Home Assistant: `http://192.168.1.30:8123`
+- Backups: nightly `restic` job to external USB disk
+
+## Conventions
+
+- Containers: `restart: unless-stopped`, pinned image tags, log rotation
+- Secrets: `.env` files with mode `600`, never committed
+- Before changing network or storage config, show a plan and wait for approval

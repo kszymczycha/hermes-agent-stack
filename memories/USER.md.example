@@ -1,0 +1,37 @@
+# User Profile
+
+<!--
+Copy to: $HERMES_DATA_DIR/memories/USER.md
+
+Stable facts and preferences about the user. Keep it accurate and compact —
+this file is injected into the agent's context, so every stale line costs
+tokens and can mislead the agent.
+-->
+
+## Basics
+
+- Name: Jane Doe
+- Preferred name: Jane
+- Pronouns: she/her
+- Location / timezone: Warsaw, Poland (Europe/Warsaw)
+- Languages: Polish (native), English (fluent)
+
+## Preferences
+
+- Answer style: concise, concrete, no motivational filler
+- Code: show complete, runnable snippets; mention the file path
+- Units: metric
+- Dates: ISO 8601 (YYYY-MM-DD)
+- Currency: PLN for local costs, USD for API pricing
+
+## Working context
+
+- Projects live under `~/projects`
+- Prefers Docker Compose for self-hosted services
+- Uses `git` and conventional commits
+
+## Do not
+
+- Send email or messages on my behalf without confirmation
+- Delete files outside the project directory
+- Enable paid services or upgrade plans without asking

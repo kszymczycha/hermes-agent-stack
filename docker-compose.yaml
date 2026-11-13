@@ -1,25 +1,55 @@
 services:
   hermes:
-    image: nousresearch/hermes-agent:latest
+    # Pinned for reproducible deploys. Bump deliberately (see README → Updating).
+    image: nousresearch/hermes-agent:${HERMES_IMAGE_TAG:-v0.23.1}
     container_name: hermes
     restart: unless-stopped
+    stop_grace_period: 30s
     command: gateway run
     ports:
-      - "8642:8642"   # gateway API
-      - "9119:9119"   # dashboard (only reached when HERMES_DASHBOARD=1)
+      # Bound to loopback on purpose. Reach it through an SSH tunnel or a
+      # TLS-terminating reverse proxy — never publish it on 0.0.0.0.
+      - "127.0.0.1:9119:9119"   # dashboard (HERMES_DASHBOARD=1)
+      # OpenAI-compatible API server. Disabled by default; to use it:
+      #   1. set API_SERVER_ENABLED=true and API_SERVER_KEY in .env
+      #   2. uncomment the line below
+      # - "127.0.0.1:8642:8642"
     volumes:
-      - ~/.hermes:/opt/data
+      # Single source of truth: config, .env, SOUL.md, memories, sessions, logs.
+      - ${HERMES_DATA_DIR:-${HOME}/.hermes}:/opt/data
     environment:
+      # Hermes reads its own secrets (LLM keys, bot tokens) from /opt/data/.env.
+      # The variables below are deployment-level settings only.
       - HERMES_DASHBOARD=1
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${HERMES_DASHBOARD_USER:-admin}
       - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${HERMES_DASHBOARD_PASSWORD:?Set HERMES_DASHBOARD_PASSWORD in .env}
       - HERMES_DASHBOARD_BASIC_AUTH_SECRET=${HERMES_DASHBOARD_SECRET:?Set HERMES_DASHBOARD_SECRET in .env}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Keep files in HERMES_DATA_DIR owned by the host user (id -u / id -g).
+      - HERMES_UID=${HERMES_UID:-1000}
+      - HERMES_GID=${HERMES_GID:-1000}
+      # Optional API server. Needs API_SERVER_KEY (min. 8 chars) when enabled.
+      - API_SERVER_ENABLED=${API_SERVER_ENABLED:-false}
+      - API_SERVER_HOST=${API_SERVER_HOST:-0.0.0.0}
+      - API_SERVER_KEY=${API_SERVER_KEY:-}
+    healthcheck:
+      # Healthy when either the dashboard (9119) or the API server (8642) listens.
+      test:
+        - CMD-SHELL
+        - >-
+          python3 -c "import socket,sys;
+          s=lambda p: socket.socket().connect_ex(('127.0.0.1',p))==0;
+          sys.exit(0 if s(9119) or s(8642) else 1)"
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 3
     deploy:
       resources:
         limits:
-          memory: 4G
-          cpus: "2.0"
+          memory: ${HERMES_MEMORY_LIMIT:-3G}
+          cpus: "${HERMES_CPUS:-2.0}"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,1 +1,7 @@
 .env
+
+# If HERMES_DATA_DIR points inside this repo, never commit live state.
+/config.yaml
+/SOUL.md
+/memories/USER.md
+/memories/MEMORY.md

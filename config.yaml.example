@@ -1,0 +1,35 @@
+# Hermes Agent configuration
+#
+# Copy to:  $HERMES_DATA_DIR/config.yaml
+# Reference: https://hermes-agent.nousresearch.com/docs/user-guide/configuration
+#
+# Model IDs and catalogs change frequently. The values below are examples —
+# run `hermes model` in the container (or use the dashboard) to pick a model
+# that your account actually has access to.
+
+model:
+  provider: openai-api      # openai-api | deepseek | openrouter | anthropic | ...
+  default: gpt-5-nano       # replace with a model available to your key
+
+  # DeepSeek alternative:
+  # provider: deepseek
+  # default: deepseek/deepseek-v4.1-flash-1017
+
+  # Custom / self-hosted endpoints only:
+  # base_url: http://host.docker.internal:8000/v1
+
+# Optional: route cheap background jobs (compression, titles, vision) to a
+# faster/cheaper model instead of the main one.
+# auxiliary:
+#   compression:
+#     provider: deepseek
+#     model: deepseek/deepseek-v4.1-flash-1017
+#   vision:
+#     provider: deepseek
+#     model: deepseek/deepseek-v4.1-flash-1017
+
+# Optional: only needed when the dashboard is served through a reverse proxy.
+# dashboard:
+#   public_url: "https://hermes.example.com"
+#   trusted_proxies:
+#     - "172.30.0.0/24"
