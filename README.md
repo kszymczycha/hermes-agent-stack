@@ -21,13 +21,11 @@ The stack runs the messaging gateway (Telegram, Discord, Slack, …), the web da
 ├── config.yaml.example     # Agent config          -> $HERMES_DATA_DIR/config.yaml
 ├── SOUL.md.example         # Agent identity        -> $HERMES_DATA_DIR/SOUL.md
 ├── AGENTS.md               # OpenCode project instructions (agent guide)
-├── AGENT.md                # Symlink -> AGENTS.md (singular compatibility)
 ├── opencode.json           # OpenCode V2 config; loads PLAN.md as instructions
 ├── .agents/
 │   └── skills/
 │       └── hermes-agent-stack/
 │           └── SKILL.md    # Project skill for OpenCode and Hermes
-├── SKILL.md                # Symlink -> .agents/.../SKILL.md
 ├── PLAN.md                 # Backlog and session handoff notes
 ├── LICENSE                 # MIT
 └── memories/
@@ -38,8 +36,7 @@ The stack runs the messaging gateway (Telegram, Discord, Slack, …), the web da
 > **OpenCode V2** loads `AGENTS.md` automatically, discovers the skill in
 > `.agents/skills/hermes-agent-stack/`, and loads `PLAN.md` through
 > `opencode.json`. **Hermes** discovers the same skill directory after a one-time
-> `hermes skills trust` inside the repository. `AGENT.md` and root `SKILL.md`
-> are compatibility symlinks — edit the canonical files, not the links.
+> `hermes skills trust` inside the repository.
 
 Runtime state is **not** stored in this repository. By default it lives in `~/.hermes`:
 

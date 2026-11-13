@@ -13,9 +13,8 @@ skills, see `SOUL.md.example` and
   `.agents/skills/hermes-agent-stack/SKILL.md`.
 - Hermes needs a one-time `hermes skills trust` inside the repository before it
   loads project skills.
-- Root `AGENT.md` and `SKILL.md` are compatibility symlinks. Edit the canonical
-  files (`AGENTS.md` and `.agents/skills/hermes-agent-stack/SKILL.md`), never
-  the links.
+- There are no duplicate copies: edit `AGENTS.md` and
+  `.agents/skills/hermes-agent-stack/SKILL.md` directly.
 
 ## What this repository is
 
@@ -70,10 +69,8 @@ Key constraints:
 | `README.md` | User-facing setup, security, backup and troubleshooting guide |
 | `PLAN.md` | Backlog and session handoff notes — read it first |
 | `AGENTS.md` | OpenCode project instructions (this file) |
-| `AGENT.md` | Symlink to `AGENTS.md` for tools that expect the singular name |
 | `opencode.json` | OpenCode V2 config; loads `PLAN.md` as instructions |
 | `.agents/skills/hermes-agent-stack/SKILL.md` | Project skill discovered by OpenCode and Hermes |
-| `SKILL.md` | Symlink to the project skill |
 | `LICENSE` | MIT |
 
 ## Session start
@@ -117,14 +114,11 @@ grep -RniE 'gemini|google' README.md .env.example config.yaml.example \
 grep -q 'provider: openrouter' config.yaml.example
 grep -q 'default: deepseek/deepseek-v4.1-flash-1017' config.yaml.example
 
-# Agent integration resolves: real AGENTS.md and real skill, working symlinks
+# Agent integration: canonical files exist
 test -f AGENTS.md
 test -f opencode.json
 python3 -m json.tool opencode.json >/dev/null
 test -f .agents/skills/hermes-agent-stack/SKILL.md
-test -L AGENT.md && test -L SKILL.md
-test "$(readlink -f AGENT.md)" = "$(readlink -f AGENTS.md)"
-test "$(readlink -f SKILL.md)" = "$(readlink -f .agents/skills/hermes-agent-stack/SKILL.md)"
 ```
 
 ## Common tasks

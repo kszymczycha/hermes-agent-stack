@@ -42,8 +42,7 @@ first, then check `git log` and `git status` before changing anything.
 - [x] Add the MIT license.
 - [x] Add `AGENTS.md` (OpenCode project instructions), `opencode.json` (loads
       `PLAN.md`), and the stack operations skill at
-      `.agents/skills/hermes-agent-stack/SKILL.md`; keep `AGENT.md` and root
-      `SKILL.md` as compatibility symlinks.
+      `.agents/skills/hermes-agent-stack/SKILL.md`.
 - [x] Create this plan.
 
 ## Backlog
@@ -230,27 +229,24 @@ automatically for sessions started in this repository.
 **Implementation:**
 
 - Canonical instructions: `AGENTS.md` (OpenCode V2 reads this file).
-- `AGENT.md` is a symlink to `AGENTS.md` for tools that expect the singular
-  name.
 - `opencode.json` uses the `instructions` array to load `PLAN.md` automatically
   in every OpenCode session.
 - Canonical skill:
   `.agents/skills/hermes-agent-stack/SKILL.md`. Both OpenCode V2 (project
   compatibility source) and Hermes (project-local skill directory) discover
   `.agents/skills/`.
-- Root `SKILL.md` is a symlink to the canonical skill, so there is exactly one
-  copy of the content.
+- Root-level symlinks were removed; the canonical files are the only copies.
 - Hermes requires a one-time `hermes skills trust` inside the repository.
 
 **Acceptance criteria (met):**
 
 - An OpenCode session sees the `hermes-agent-stack` skill automatically.
 - A Hermes session sees it after `hermes skills trust`.
-- Only one copy of the skill content is tracked; the root file is a symlink.
+- Only one copy of each document is tracked (no duplicate symlinks).
 - `README.md` and `AGENTS.md` describe the activation step.
 
 **Files:** `.agents/skills/hermes-agent-stack/SKILL.md`, `AGENTS.md`,
-`opencode.json`, `AGENT.md` (symlink), `SKILL.md` (symlink), `README.md`.
+`opencode.json`, `README.md`.
 
 ---
 
@@ -299,14 +295,11 @@ grep -RniE 'gemini|google' README.md .env.example config.yaml.example \
 grep -q 'provider: openrouter' config.yaml.example
 grep -q 'default: deepseek/deepseek-v4.1-flash-1017' config.yaml.example
 
-# 4. Agent integration: real files exist and symlinks resolve
+# 4. Agent integration: canonical files exist
 test -f AGENTS.md
 test -f opencode.json
 python3 -m json.tool opencode.json >/dev/null
 test -f .agents/skills/hermes-agent-stack/SKILL.md
-test -L AGENT.md && test -L SKILL.md
-test "$(readlink -f AGENT.md)" = "$(readlink -f AGENTS.md)"
-test "$(readlink -f SKILL.md)" = "$(readlink -f .agents/skills/hermes-agent-stack/SKILL.md)"
 ```
 
 Run these from the repository root. Do not commit `.env`, `config.yaml`,
@@ -343,7 +336,7 @@ Run these from the repository root. Do not commit `.env`, `config.yaml`,
 
 - **2026-11-13:** Plan created. Recorded the hardening work, the DeepSeek →
   OpenRouter correction, the MIT license, and the remaining P2/P3/P4 backlog.
-- **2026-11-13:** Added `AGENT.md`, `SKILL.md`, and the P3-4 task for wiring the
+- **2026-11-13:** Added the initial agent guide and the P3-4 task for wiring the
   skill into project-local discovery.
 - **2026-11-13:** Standardized the repo on OpenRouter-first:
   `provider: openrouter`, `deepseek/deepseek-v4.1-flash-1017`. OpenAI direct is
@@ -351,5 +344,7 @@ Run these from the repository root. Do not commit `.env`, `config.yaml`,
   migration notes.
 - **2026-11-13:** Added OpenCode V2 integration: canonical `AGENTS.md`,
   skill moved to `.agents/skills/hermes-agent-stack/SKILL.md` (shared by
-  OpenCode and Hermes), `opencode.json` loads `PLAN.md`, and compatibility
-  symlinks `AGENT.md` / `SKILL.md`.
+  OpenCode and Hermes), `opencode.json` loads `PLAN.md`, plus temporary
+  compatibility links for legacy filenames.
+- **2026-11-13:** Cleaned up: removed the redundant compatibility symlinks and
+  kept only the canonical `AGENTS.md` and the skill in `.agents/skills/`.

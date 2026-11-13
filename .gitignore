@@ -5,3 +5,7 @@
 /SOUL.md
 /memories/USER.md
 /memories/MEMORY.md
+
+# Local backup artifacts (see README → Backups)
+/hermes-backup-*.tar.gz
+/hermes-compose-env-*.backup
